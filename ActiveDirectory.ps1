@@ -12,7 +12,7 @@ Configuration ActiveDirectory
     [Int]$RetryIntervalSec=30
   ) 
 
-  Import-DscResource -ModuleName xActiveDirectory, xNetworking, PSDesiredStateConfiguration, xPendingReboot
+  Import-DscResource -ModuleName xActiveDirectory, xStorage, xNetworking, PSDesiredStateConfiguration, xPendingReboot
   [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($Admincreds.UserName)", $Admincreds.Password)
   $Interface=Get-NetAdapter|Where Name -Like "Ethernet*"|Select-Object -First 1
   $InterfaceAlias=$($Interface.Name)
@@ -55,6 +55,19 @@ Configuration ActiveDirectory
       AddressFamily  = 'IPv4'
       DependsOn = "[WindowsFeature]DNS"
     }
+    
+    xWaitforDisk Disk2
+    {
+      DiskNumber = 2
+      RetryIntervalSec =$RetryIntervalSec
+      RetryCount = $RetryCount
+    }
+
+    xDisk ADDataDisk {
+      DiskNumber = 2
+      DriveLetter = "F"
+      DependsOn = "[xWaitForDisk]Disk2"
+    }
 
     WindowsFeature ADDSInstall 
     { 
@@ -85,7 +98,7 @@ Configuration ActiveDirectory
       DatabasePath = "F:\NTDS"
       LogPath = "F:\NTDS"
       SysvolPath = "F:\SYSVOL"
-      DependsOn = "[WindowsFeature]ADDSInstall"
+      DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall")
     } 
   }
 }
