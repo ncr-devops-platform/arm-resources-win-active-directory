@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'ActiveDirectory'
-  s.version     = '0.1.10'
+  s.version     = '0.1.11'
   s.date        = '2017-08-01'
   s.summary     = 'ActiveDirectory'
   s.description = 'A powershell DSC package for enablign active directory control services on a vm'
